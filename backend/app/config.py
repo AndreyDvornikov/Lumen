@@ -1,4 +1,5 @@
 from functools import lru_cache
+
 from pydantic import Field
 from pydantic_settings import BaseSettings
 
@@ -12,6 +13,8 @@ class Settings(BaseSettings):
 
     redis_host: str = Field(default="redis", alias="REDIS_HOST")
     redis_port: int = Field(default=6379, alias="REDIS_PORT")
+
+    jwt_secret_key: str = Field(default="change-me", alias="JWT_SECRET_KEY")
 
     @property
     def postgres_dsn(self) -> str:

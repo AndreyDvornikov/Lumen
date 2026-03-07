@@ -1,6 +1,8 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import Depends, FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.auth.dependencies import get_current_active_user
+from app.auth.router import router as auth_router
 from app.cache import redis_client
 from app.config import get_settings
 from app.database import init_db
@@ -17,6 +19,9 @@ app.add_middleware(
 )
 
 
+app.include_router(auth_router)
+
+
 @app.on_event("startup")
 def startup_event() -> None:
     init_db()
@@ -28,7 +33,7 @@ def health_check() -> dict[str, str]:
 
 
 @app.get("/api/v1/system")
-def system_status() -> dict[str, str | int]:
+def system_status(_=Depends(get_current_active_user)) -> dict[str, str | int]:
     return {
         "postgres_host": settings.postgres_host,
         "postgres_db": settings.postgres_db,
