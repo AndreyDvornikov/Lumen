@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.cache import redis_client
 from app.config import get_settings
+from app.database import init_db
 
 app = FastAPI(title="Lumen Protocol API", version="0.1.0")
 settings = get_settings()
@@ -14,6 +15,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.on_event("startup")
+def startup_event() -> None:
+    init_db()
 
 
 @app.get("/health")

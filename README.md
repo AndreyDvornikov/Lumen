@@ -13,6 +13,7 @@ Initial full-stack scaffold for a tabletop RPG campaign portal.
 ```text
 backend/
   app/
+    models/
 frontend/
 docker-compose.yml
 ```
