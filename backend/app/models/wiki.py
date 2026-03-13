@@ -37,6 +37,7 @@ class WikiEntry(Base):
     slug: Mapped[str] = mapped_column(String(240), nullable=False, index=True)
     content: Mapped[str] = mapped_column(Text, nullable=False)
     is_published: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    is_unlocked: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     tags: Mapped[list[str]] = mapped_column(JSONB, default=list, nullable=False)
     created_by_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"), nullable=False)
     updated_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))

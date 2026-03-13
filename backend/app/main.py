@@ -6,6 +6,11 @@ from app.auth.router import router as auth_router
 from app.cache import redis_client
 from app.config import get_settings
 from app.database import init_db
+from app.routers.characters import router as characters_router
+from app.routers.gm import router as gm_router
+from app.routers.maps import router as maps_router
+from app.routers.timers import router as timers_router
+from app.routers.wiki import router as wiki_router
 
 app = FastAPI(title="Lumen Protocol API", version="0.1.0")
 settings = get_settings()
@@ -20,6 +25,11 @@ app.add_middleware(
 
 
 app.include_router(auth_router)
+app.include_router(characters_router)
+app.include_router(gm_router)
+app.include_router(maps_router)
+app.include_router(timers_router)
+app.include_router(wiki_router)
 
 
 @app.on_event("startup")

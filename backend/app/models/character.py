@@ -14,14 +14,14 @@ class Character(Base):
     __tablename__ = "characters"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    player_id: Mapped[int] = mapped_column(ForeignKey("players.id", ondelete="CASCADE"), nullable=False, index=True)
+    player_id: Mapped[int | None] = mapped_column(ForeignKey("players.id", ondelete="CASCADE"), index=True)
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     archetype: Mapped[str | None] = mapped_column(String(120))
     ancestry: Mapped[str | None] = mapped_column(String(120))
     level: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
     hit_points_current: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     hit_points_max: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
-    status: Mapped[str] = mapped_column(String(50), default="active", nullable=False)
+    status: Mapped[str] = mapped_column(String(50), default="unknown", nullable=False)
     stats: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict, nullable=False)
     inventory: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, default=list, nullable=False)
     backstory: Mapped[str | None] = mapped_column(Text)

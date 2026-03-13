@@ -1,5 +1,7 @@
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.models.user import UserRole
+
 
 class RegisterRequest(BaseModel):
     email: str
@@ -25,6 +27,7 @@ class AuthUserResponse(BaseModel):
     username: str
     is_active: bool
     is_admin: bool
+    role: UserRole
 
 
 class RegisterResponse(BaseModel):

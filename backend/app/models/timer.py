@@ -19,6 +19,7 @@ class Timer(Base):
     duration_seconds: Mapped[int] = mapped_column(Integer, nullable=False)
     remaining_seconds: Mapped[int] = mapped_column(Integer, nullable=False)
     is_running: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    is_paused: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     paused_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_by_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"), nullable=False)
