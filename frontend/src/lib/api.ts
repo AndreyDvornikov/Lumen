@@ -26,16 +26,21 @@ export function resolveWebSocketUrl(path: string): string {
 
 export async function apiFetch<T>(pathOrUrl: string, options: ApiFetchOptions = {}): Promise<T> {
   const { withAuth = true, headers = {}, ...rest } = options;
-
   const token = getToken();
+  const requestHeaders = new Headers(headers);
+  const isFormDataBody = typeof FormData !== "undefined" && rest.body instanceof FormData;
+
+  if (!isFormDataBody && !requestHeaders.has("Content-Type")) {
+    requestHeaders.set("Content-Type", "application/json");
+  }
+
+  if (withAuth && token) {
+    requestHeaders.set("Authorization", `Bearer ${token}`);
+  }
 
   const response = await fetch(toUrl(pathOrUrl), {
     ...rest,
-    headers: {
-      "Content-Type": "application/json",
-      ...(headers as Record<string, string>),
-      ...(withAuth && token ? { Authorization: `Bearer ${token}` } : {}),
-    },
+    headers: requestHeaders,
     cache: rest.cache ?? "no-store",
   });
 

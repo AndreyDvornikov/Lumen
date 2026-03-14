@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { ImageInput } from "@/components/ui/ImageInput";
 import type { AuthUser, WikiCategory, WikiEntry, WikiVisibilityState } from "@/components/wiki/types";
 import { slugifyWikiTitle, visibilityLabel } from "@/components/wiki/utils";
 import { apiFetch } from "@/lib/api";
@@ -248,11 +249,10 @@ export default function GmWikiPage() {
             placeholder="Slug"
             className="w-full rounded-xl border border-lumen-dark bg-lumen-bg px-4 py-3 text-slate-100 outline-none focus:ring-2 focus:ring-lumen-mid"
           />
-          <input
+          <ImageInput
             value={newCategory.image_url}
-            onChange={(event) => setNewCategory((current) => ({ ...current, image_url: event.target.value }))}
-            placeholder="Image URL"
-            className="w-full rounded-xl border border-lumen-dark bg-lumen-bg px-4 py-3 text-slate-100 outline-none focus:ring-2 focus:ring-lumen-mid"
+            onChange={(url) => setNewCategory((current) => ({ ...current, image_url: url }))}
+            label="Category image"
           />
           <textarea
             value={newCategory.description}
@@ -305,11 +305,10 @@ export default function GmWikiPage() {
               </option>
             ))}
           </select>
-          <input
+          <ImageInput
             value={newArticle.image_url}
-            onChange={(event) => setNewArticle((current) => ({ ...current, image_url: event.target.value }))}
-            placeholder="Cover image URL"
-            className="w-full rounded-xl border border-lumen-dark bg-lumen-bg px-4 py-3 text-slate-100 outline-none focus:ring-2 focus:ring-lumen-mid"
+            onChange={(url) => setNewArticle((current) => ({ ...current, image_url: url }))}
+            label="Article cover image"
           />
           <select
             value={newArticle.visibility_state}
@@ -368,15 +367,15 @@ export default function GmWikiPage() {
                   }
                   className="w-full rounded-xl border border-lumen-dark bg-lumen-bg px-4 py-3 text-slate-100 outline-none focus:ring-2 focus:ring-lumen-mid"
                 />
-                <input
+                <ImageInput
                   value={draft.image_url}
-                  onChange={(event) =>
+                  onChange={(url) =>
                     setCategoryDrafts((current) => ({
                       ...current,
-                      [category.id]: { ...current[category.id], image_url: event.target.value },
+                      [category.id]: { ...current[category.id], image_url: url },
                     }))
                   }
-                  className="w-full rounded-xl border border-lumen-dark bg-lumen-bg px-4 py-3 text-slate-100 outline-none focus:ring-2 focus:ring-lumen-mid"
+                  label="Category image"
                 />
                 <textarea
                   value={draft.description}
