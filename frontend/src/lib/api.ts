@@ -25,23 +25,23 @@ export function resolveWebSocketUrl(path: string): string {
 }
 
 export async function apiFetch<T>(pathOrUrl: string, options: ApiFetchOptions = {}): Promise<T> {
-  const { withAuth = true, headers, ...rest } = options;
+  const { withAuth = true, headers = {}, ...rest } = options;
 
   const token = getToken();
 
   const response = await fetch(toUrl(pathOrUrl), {
     ...rest,
     headers: {
-      ...(headers ?? {}),
+      "Content-Type": "application/json",
+      ...(headers as Record<string, string>),
       ...(withAuth && token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(rest.body ? { "Content-Type": "application/json" } : {}),
     },
     cache: rest.cache ?? "no-store",
   });
 
   if (!response.ok) {
     const text = await response.text();
-    console.error("API ERROR:", text);
+    console.error("API ERROR RESPONSE:", text);
     throw new Error(`Request failed with status ${response.status}`);
   }
 

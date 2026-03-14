@@ -4,7 +4,7 @@ from app.models.map import Map, MapMarker
 from app.models.player import Player
 from app.models.timer import Timer, TimerTrigger
 from app.models.user import User
-from app.models.wiki import WikiCategory, WikiEntry
+from app.models.wiki import WikiCategory, WikiEntry, WikiVisibilityState
 
 __all__ = [
     "User",
@@ -12,6 +12,7 @@ __all__ = [
     "GameState",
     "WikiCategory",
     "WikiEntry",
+    "WikiVisibilityState",
     "Map",
     "MapMarker",
     "Character",

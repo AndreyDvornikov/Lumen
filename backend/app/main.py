@@ -1,3 +1,5 @@
+import asyncio
+
 from fastapi import Depends, FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -9,6 +11,7 @@ from app.database import init_db
 from app.routers.characters import router as characters_router
 from app.routers.gm import router as gm_router
 from app.routers.maps import router as maps_router
+from app.realtime import campaign_socket_manager
 from app.routers.timers import router as timers_router
 from app.routers.wiki import router as wiki_router
 
@@ -35,6 +38,7 @@ app.include_router(wiki_router)
 @app.on_event("startup")
 def startup_event() -> None:
     init_db()
+    campaign_socket_manager.set_loop(asyncio.get_event_loop())
 
 
 @app.get("/health")
@@ -54,7 +58,7 @@ def system_status(_=Depends(get_current_active_user)) -> dict[str, str | int]:
 
 @app.websocket("/ws/campaign/{campaign_id}")
 async def campaign_socket(websocket: WebSocket, campaign_id: str) -> None:
-    await websocket.accept()
+    await campaign_socket_manager.connect(campaign_id, websocket)
 
     join_message = f"Joined campaign {campaign_id}"
     redis_client.publish(f"campaign:{campaign_id}", join_message)
@@ -64,13 +68,7 @@ async def campaign_socket(websocket: WebSocket, campaign_id: str) -> None:
         while True:
             message = await websocket.receive_text()
             redis_client.publish(f"campaign:{campaign_id}", message)
-            await websocket.send_json(
-                {
-                    "event": "chat",
-                    "campaignId": campaign_id,
-                    "message": message,
-                }
-            )
     except WebSocketDisconnect:
         leave_message = f"Left campaign {campaign_id}"
         redis_client.publish(f"campaign:{campaign_id}", leave_message)
+        campaign_socket_manager.disconnect(campaign_id, websocket)

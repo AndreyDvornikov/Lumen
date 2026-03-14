@@ -34,10 +34,14 @@ export function visibilityLabel(visibilityState: WikiVisibilityState): string {
   }
 }
 
-export function slugifyWikiTitle(value: string): string {
-  return value
+export function slugifyWikiTitle(title: string): string {
+  const slug = title
     .trim()
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9а-яё-]/g, "")
+    .replace(/-+/g, "-")
     .replace(/^-+|-+$/g, "");
+
+  return slug || "article";
 }

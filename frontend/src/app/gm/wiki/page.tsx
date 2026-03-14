@@ -50,6 +50,7 @@ export default function GmWikiPage() {
   const [entries, setEntries] = useState<WikiEntry[]>([]);
   const [newCategory, setNewCategory] = useState(DEFAULT_CATEGORY_FORM);
   const [newArticle, setNewArticle] = useState(DEFAULT_ARTICLE_FORM);
+  const [isArticleSlugEdited, setIsArticleSlugEdited] = useState(false);
   const [categoryDrafts, setCategoryDrafts] = useState<Record<number, CategoryFormState>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -169,7 +170,7 @@ export default function GmWikiPage() {
       const payload = {
         category_id: Number(newArticle.category_id),
         title: newArticle.title.trim(),
-        slug: newArticle.slug || slugifyWikiTitle(newArticle.title),
+        slug: newArticle.slug || slugifyWikiTitle(newArticle.title) || "article",
         image_url: newArticle.image_url || null,
         content: newArticle.content?.trim() || " ",
         is_published: false,
@@ -178,8 +179,6 @@ export default function GmWikiPage() {
         tags: [],
       };
 
-      console.log("CREATE ARTICLE PAYLOAD", payload);
-
       const created = await apiFetch<WikiEntry>("/gm/wiki/entries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -187,6 +186,7 @@ export default function GmWikiPage() {
       });
 
       setNewArticle(DEFAULT_ARTICLE_FORM);
+      setIsArticleSlugEdited(false);
       router.push(`/gm/wiki/edit/${created.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create article");
@@ -278,10 +278,19 @@ export default function GmWikiPage() {
               setNewArticle((current) => ({
                 ...current,
                 title: event.target.value,
-                slug: slugifyWikiTitle(event.target.value),
+                slug: isArticleSlugEdited ? current.slug : slugifyWikiTitle(event.target.value),
               }))
             }
             placeholder="Article title"
+            className="w-full rounded-xl border border-lumen-dark bg-lumen-bg px-4 py-3 text-slate-100 outline-none focus:ring-2 focus:ring-lumen-mid"
+          />
+          <input
+            value={newArticle.slug}
+            onChange={(event) => {
+              setIsArticleSlugEdited(true);
+              setNewArticle((current) => ({ ...current, slug: event.target.value }));
+            }}
+            placeholder="Slug"
             className="w-full rounded-xl border border-lumen-dark bg-lumen-bg px-4 py-3 text-slate-100 outline-none focus:ring-2 focus:ring-lumen-mid"
           />
           <select

@@ -53,7 +53,7 @@ export default function HomePage() {
                   О мире: Вечная ночь Сильвервуда
                 </h2>
                 <div className="max-w-xl space-y-4 leading-relaxed text-slate-200">
-                  <p>Сеттинг: Сурвайвл-хоррор в декорациях темного фэнтези.</p>
+                  <p>Сеттинг: Сурвайвл-хоррор в декорациях городского фэнтези.</p>
                   <p>
                     Более 300 лет назад мир погрузился во Тьму. Единственные очаги жизни — города Коалиции
                     Сильвервуд, зажатые в кольце исполинской тайги и живущие за счет гудящих генераторов и электростанций.
@@ -143,12 +143,7 @@ export default function HomePage() {
                 <div className="max-w-xl space-y-4 leading-relaxed text-slate-200">
                   <p>Бюро ценит сотрудников как государственное имущество.</p>
                   <p>Если тело удастся эвакуировать, врачи вернут вас в строй методами «медицины 60-х».</p>
-                  <p>Будьте готовы к последствиям:</p>
-                  <ul className="list-disc space-y-1 pl-6">
-                    <li>железные протезы</li>
-                    <li>светочувствительные линзы</li>
-                    <li>зависимость от стимуляторов</li>
-                  </ul>
+                  <p>Будьте готовы к последствиям.</p>
                 </div>
               </div>
               <div />
@@ -157,12 +152,14 @@ export default function HomePage() {
         </div>
 
         <section className="mx-auto mt-24 max-w-6xl text-center">
-          <Link
-            href="/login"
+          <a
+            href="https://forms.gle/35kK9nT3k5vjGc586"
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex items-center rounded-xl bg-lumen-mid px-8 py-4 text-lg font-bold text-white transition hover:bg-lumen-accent"
           >
-            Зарегистрироваться
-          </Link>
+            Подать заявку на игру
+          </a>
         </section>
       </main>
 
