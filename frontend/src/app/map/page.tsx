@@ -1,10 +1,5 @@
-import dynamic from "next/dynamic";
+import { redirect } from "next/navigation";
 
-const CampaignMapPage = dynamic(
-  () => import("@/components/CampaignMapPage").then((mod) => mod.CampaignMapPage),
-  { ssr: false }
-);
-
-export default function MapPage() {
-  return <CampaignMapPage />;
+export default function LegacyMapPage() {
+  redirect("/maps");
 }

@@ -22,7 +22,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (getToken()) {
-      router.replace("/map");
+      router.replace("/maps");
     }
   }, [router]);
 
@@ -39,7 +39,7 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password }),
       });
       setToken(data.access_token);
-      router.replace("/map");
+      router.replace("/maps");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {

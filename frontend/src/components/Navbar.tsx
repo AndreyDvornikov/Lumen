@@ -9,7 +9,7 @@ import { getToken, logout } from "@/lib/auth";
 import type { AuthUser } from "@/components/wiki/types";
 
 const NAV_LINKS = [
-  { href: "/map", label: "Map" },
+  { href: "/maps", label: "Maps" },
   { href: "/wiki", label: "Wiki" },
   { href: "/characters", label: "Characters" },
   { href: "/videos", label: "Chronicles" },
@@ -81,16 +81,38 @@ export function Navbar() {
               );
             })}
             {currentUser?.role === "gm" ? (
-              <Link
-                href="/gm/wiki"
-                className={`rounded-md px-3 py-1.5 text-sm transition ${
-                  pathname.startsWith("/gm/wiki")
-                    ? "bg-lumen-dark/40 text-lumen-accent"
-                    : "text-gray-300 hover:text-lumen-accent"
-                }`}
-              >
-                GM Wiki
-              </Link>
+              <>
+                <Link
+                  href="/gm/wiki"
+                  className={`rounded-md px-3 py-1.5 text-sm transition ${
+                    pathname.startsWith("/gm/wiki")
+                      ? "bg-lumen-dark/40 text-lumen-accent"
+                      : "text-gray-300 hover:text-lumen-accent"
+                  }`}
+                >
+                  GM Wiki
+                </Link>
+                <Link
+                  href="/gm/players"
+                  className={`rounded-md px-3 py-1.5 text-sm transition ${
+                    pathname.startsWith("/gm/players")
+                      ? "bg-lumen-dark/40 text-lumen-accent"
+                      : "text-gray-300 hover:text-lumen-accent"
+                  }`}
+                >
+                  Players
+                </Link>
+                <Link
+                  href="/gm/maps"
+                  className={`rounded-md px-3 py-1.5 text-sm transition ${
+                    pathname.startsWith("/gm/maps")
+                      ? "bg-lumen-dark/40 text-lumen-accent"
+                      : "text-gray-300 hover:text-lumen-accent"
+                  }`}
+                >
+                  GM Maps
+                </Link>
+              </>
             ) : null}
           </div>
         </div>

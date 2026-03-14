@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
+import { ImageInput } from "@/components/ui/ImageInput";
 import { WikiArticle } from "@/components/wiki/WikiArticle";
 import { WikiEditor } from "@/components/wiki/editor/WikiEditor";
 import type { AuthUser, WikiCategory, WikiEntry, WikiVisibilityState } from "@/components/wiki/types";
@@ -176,21 +177,6 @@ export default function GmWikiEditPage() {
     }
   }
 
-  function handleImageUpload(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (!file) {
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = typeof reader.result === "string" ? reader.result : "";
-      setForm((current) => ({ ...current, image_url: result }));
-    };
-    reader.readAsDataURL(file);
-    event.target.value = "";
-  }
-
   const titleToIdMap = useMemo(
     () => new Map(entries.map((entry) => [entry.title.toLowerCase(), entry.id])),
     [entries]
@@ -267,18 +253,11 @@ export default function GmWikiEditPage() {
             ))}
           </select>
 
-          <div className="space-y-3">
-            <input
-              value={form.image_url}
-              onChange={(event) => setForm((current) => ({ ...current, image_url: event.target.value }))}
-              placeholder="Cover image URL"
-              className="w-full rounded-xl border border-lumen-dark bg-lumen-bg px-4 py-3 text-slate-100 outline-none focus:ring-2 focus:ring-lumen-mid"
-            />
-            <label className="inline-flex cursor-pointer rounded-xl border border-lumen-dark px-4 py-2 text-sm text-slate-200 transition hover:border-lumen-mid">
-              Upload cover image
-              <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-            </label>
-          </div>
+          <ImageInput
+            value={form.image_url}
+            onChange={(url) => setForm((current) => ({ ...current, image_url: url }))}
+            label="Cover image"
+          />
 
           <input
             value={form.tags}
