@@ -2,26 +2,24 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useParams } from "next/navigation";
 
-import { WikiCategoryGrid } from "@/components/wiki/WikiCategoryGrid";
 import { WikiEntryCard } from "@/components/wiki/WikiEntryCard";
 import { WikiSearch } from "@/components/wiki/WikiSearch";
 import type { AuthUser, WikiCategory, WikiEntry } from "@/components/wiki/types";
 import { apiFetch, resolveWebSocketUrl } from "@/lib/api";
 import { getToken, logout } from "@/lib/auth";
 
-export default function WikiPage() {
+export default function WikiCategoryPage() {
+  const params = useParams<{ id: string }>();
+  const categoryId = Number(params.id);
+
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
   const [categories, setCategories] = useState<WikiCategory[]>([]);
   const [entries, setEntries] = useState<WikiEntry[]>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const categoryById = useMemo(
-    () => Object.fromEntries(categories.map((category) => [category.id, category])),
-    [categories]
-  );
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -39,7 +37,7 @@ export default function WikiPage() {
         logout();
         setCurrentUser(null);
       }
-      setError(err instanceof Error ? err.message : "Failed to load wiki data");
+      setError(err instanceof Error ? err.message : "Failed to load wiki category");
     } finally {
       setLoading(false);
     }
@@ -79,11 +77,12 @@ export default function WikiPage() {
     const socket = new WebSocket(resolveWebSocketUrl("/ws/campaign/wiki"));
     socket.onmessage = (event) => {
       try {
-        const payload = JSON.parse(event.data) as { event?: string };
+        const payload = JSON.parse(event.data) as { event?: string; categoryId?: number };
         if (
-          payload.event === "wiki_entry_unlocked" ||
-          payload.event === "wiki_entry_created" ||
-          payload.event === "wiki_entry_updated"
+          (payload.event === "wiki_entry_unlocked" ||
+            payload.event === "wiki_entry_created" ||
+            payload.event === "wiki_entry_updated") &&
+          payload.categoryId === categoryId
         ) {
           void loadData();
         }
@@ -95,9 +94,17 @@ export default function WikiPage() {
     return () => {
       socket.close();
     };
-  }, [loadData]);
+  }, [categoryId, loadData]);
+
+  const currentCategory = useMemo(
+    () => categories.find((category) => category.id === categoryId) ?? null,
+    [categories, categoryId]
+  );
 
   const filteredEntries = entries.filter((entry) => {
+    if (entry.category_id !== categoryId) {
+      return false;
+    }
     const normalizedQuery = query.trim().toLowerCase();
     if (!normalizedQuery) {
       return true;
@@ -110,48 +117,36 @@ export default function WikiPage() {
 
   return (
     <main className="mx-auto flex min-h-[calc(100vh-64px)] w-full max-w-6xl flex-col gap-6 px-6 py-8">
+      <div>
+        <Link href="/wiki" className="text-sm text-slate-300 transition hover:text-lumen-accent">
+          Back to wiki
+        </Link>
+      </div>
+
       <header className="space-y-2 rounded-2xl border border-lumen-dark bg-lumen-bg p-5">
-        <p className="text-xs uppercase tracking-[0.2em] text-lumen-accent">Campaign Archive</p>
-        <h1 className="text-3xl font-semibold text-lumen-accent">Wiki</h1>
-        <p className="text-sm text-slate-300">Browse the discovered records of the campaign.</p>
-        {currentUser?.role === "gm" ? (
-          <Link
-            href="/gm/wiki"
-            className="inline-flex rounded-lg border border-lumen-mid px-4 py-2 text-sm text-lumen-accent transition hover:bg-lumen-dark/20"
-          >
-            Open GM Panel
-          </Link>
-        ) : null}
+        <p className="text-xs uppercase tracking-[0.2em] text-lumen-accent">Category</p>
+        <h1 className="text-3xl font-semibold text-slate-100">{currentCategory?.name ?? "Wiki Category"}</h1>
+        <p className="text-sm text-slate-300">{currentCategory?.description ?? "Loading category details..."}</p>
       </header>
 
       <section className="rounded-2xl border border-lumen-dark bg-lumen-bg p-5">
-        <WikiSearch query={query} onQueryChange={setQuery} />
+        <WikiSearch query={query} onQueryChange={setQuery} label="Search in category" />
       </section>
 
-      {loading ? <p className="text-sm text-slate-300">Loading wiki entries...</p> : null}
+      {loading ? <p className="text-sm text-slate-300">Loading category entries...</p> : null}
       {error ? <p className="text-sm text-rose-300">{error}</p> : null}
 
       {!loading && !error ? (
-        <>
-          <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-slate-100">Categories</h2>
-            <WikiCategoryGrid categories={categories} />
-          </section>
-
-          <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-slate-100">Articles</h2>
-            <div className="grid gap-4 lg:grid-cols-2">
-              {filteredEntries.map((entry) => (
-                <WikiEntryCard
-                  key={entry.id}
-                  entry={entry}
-                  category={categoryById[entry.category_id]}
-                  isGm={currentUser?.role === "gm"}
-                />
-              ))}
-            </div>
-          </section>
-        </>
+        <div className="grid gap-4 lg:grid-cols-2">
+          {filteredEntries.map((entry) => (
+            <WikiEntryCard
+              key={entry.id}
+              entry={entry}
+              category={currentCategory ?? undefined}
+              isGm={currentUser?.role === "gm"}
+            />
+          ))}
+        </div>
       ) : null}
     </main>
   );

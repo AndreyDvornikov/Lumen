@@ -18,25 +18,40 @@ export function resolveApiAsset(pathOrUrl: string): string {
   return toUrl(pathOrUrl);
 }
 
+export function resolveWebSocketUrl(path: string): string {
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  const wsBase = API_BASE.replace(/^http/, "ws");
+  return `${wsBase}${normalizedPath}`;
+}
+
 export async function apiFetch<T>(pathOrUrl: string, options: ApiFetchOptions = {}): Promise<T> {
   const { withAuth = true, headers, ...rest } = options;
 
-  const requestHeaders = new Headers(headers ?? {});
-  if (withAuth) {
-    const token = getToken();
-    if (token) {
-      requestHeaders.set("Authorization", `Bearer ${token}`);
-    }
-  }
+  const token = getToken();
 
   const response = await fetch(toUrl(pathOrUrl), {
     ...rest,
-    headers: requestHeaders,
+    headers: {
+      ...(headers ?? {}),
+      ...(withAuth && token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(rest.body ? { "Content-Type": "application/json" } : {}),
+    },
     cache: rest.cache ?? "no-store",
   });
 
   if (!response.ok) {
+    const text = await response.text();
+    console.error("API ERROR:", text);
     throw new Error(`Request failed with status ${response.status}`);
+  }
+
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
+  const contentType = response.headers.get("content-type") ?? "";
+  if (!contentType.includes("application/json")) {
+    return undefined as T;
   }
 
   return (await response.json()) as T;

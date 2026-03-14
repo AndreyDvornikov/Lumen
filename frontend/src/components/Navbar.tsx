@@ -4,7 +4,9 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { apiFetch } from "@/lib/api";
 import { getToken, logout } from "@/lib/auth";
+import type { AuthUser } from "@/components/wiki/types";
 
 const NAV_LINKS = [
   { href: "/map", label: "Map" },
@@ -17,9 +19,37 @@ export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [hasToken, setHasToken] = useState(false);
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
 
   useEffect(() => {
     setHasToken(Boolean(getToken()));
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!getToken()) {
+      setCurrentUser(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function loadCurrentUser() {
+      try {
+        const user = await apiFetch<AuthUser>("/auth/me");
+        if (!cancelled) {
+          setCurrentUser(user);
+        }
+      } catch {
+        if (!cancelled) {
+          setCurrentUser(null);
+        }
+      }
+    }
+
+    void loadCurrentUser();
+    return () => {
+      cancelled = true;
+    };
   }, [pathname]);
 
   function handleLogout() {
@@ -50,6 +80,18 @@ export function Navbar() {
                 </Link>
               );
             })}
+            {currentUser?.role === "gm" ? (
+              <Link
+                href="/gm/wiki"
+                className={`rounded-md px-3 py-1.5 text-sm transition ${
+                  pathname.startsWith("/gm/wiki")
+                    ? "bg-lumen-dark/40 text-lumen-accent"
+                    : "text-gray-300 hover:text-lumen-accent"
+                }`}
+              >
+                GM Wiki
+              </Link>
+            ) : null}
           </div>
         </div>
 
