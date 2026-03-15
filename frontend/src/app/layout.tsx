@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Navbar } from "@/components/Navbar";
 
 import "./globals.css";
@@ -6,6 +6,11 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Lumen Protocol",
   description: "Campaign portal for tabletop RPG sessions.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({

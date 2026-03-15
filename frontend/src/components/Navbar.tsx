@@ -60,12 +60,12 @@ export function Navbar() {
 
   return (
     <header className="border-b border-lumen-dark bg-lumen-bg">
-      <nav className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-        <div className="flex items-center gap-6">
-          <Link href="/" className="text-lg font-semibold text-lumen-accent hover:text-lumen-accent/90">
+      <nav className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3 sm:gap-6">
+          <Link href="/" className="shrink-0 text-lg font-semibold text-lumen-accent hover:text-lumen-accent/90">
             Lumen Protocol
           </Link>
-          <div className="flex items-center gap-1">
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1">
             {NAV_LINKS.map((link) => {
               const active = pathname === link.href;
               return (
@@ -121,14 +121,14 @@ export function Navbar() {
           <button
             type="button"
             onClick={handleLogout}
-            className="rounded-md border border-lumen-dark px-3 py-1.5 text-sm text-gray-300 transition hover:border-lumen-mid hover:text-lumen-accent"
+            className="shrink-0 rounded-md border border-lumen-dark px-3 py-1.5 text-sm text-gray-300 transition hover:border-lumen-mid hover:text-lumen-accent"
           >
             Logout
           </button>
         ) : (
           <Link
             href="/login"
-            className="rounded-md border border-lumen-dark px-3 py-1.5 text-sm text-gray-300 transition hover:border-lumen-mid hover:text-lumen-accent"
+            className="shrink-0 rounded-md border border-lumen-dark px-3 py-1.5 text-sm text-gray-300 transition hover:border-lumen-mid hover:text-lumen-accent"
           >
             Login
           </Link>

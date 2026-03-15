@@ -1388,8 +1388,8 @@ export default function GmMapEditorPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-[calc(100vh-64px)] w-full max-w-[1500px] flex-col gap-6 px-6 py-8">
-      <div className="flex items-center justify-between gap-4">
+    <main className="mx-auto flex min-h-[calc(100vh-64px)] w-full max-w-screen-2xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <Link
           href="/gm/maps"
           className="text-sm text-slate-300 transition hover:text-lumen-accent"

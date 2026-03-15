@@ -9,12 +9,19 @@
 body {
   @apply bg-lumen-bg text-slate-100;
 }
+
+html,
+body {
+  width: 100%;
+  overflow-x: hidden;
+}
+
 .characters-page {
 
   position: relative;
 
   min-height: 100vh;
-  padding: 80px 40px;
+  padding: clamp(64px, 8vw, 80px) clamp(16px, 5vw, 40px);
 
   background:
     radial-gradient(circle at center, rgba(0,0,0,0.35), rgba(0,0,0,0.9)),
@@ -63,11 +70,12 @@ body {
 /* стол */
 
 .desk {
+  width: 100%;
   max-width: 1100px;
   margin: auto;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 60px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: clamp(20px, 4vw, 60px);
   justify-items: center;
 }
 
@@ -75,7 +83,8 @@ body {
 
 .character-card {
 
-  width: 320px;
+  width: 100%;
+  max-width: 320px;
 
   background: #e7d8b8;
 
@@ -163,7 +172,8 @@ body {
 
 .character-card {
 
-width: 320px;
+width: 100%;
+max-width: 320px;
 
 background: #f3e6c9;
 border-radius: 6px;
@@ -216,6 +226,8 @@ color: #111;
 
 font-size: 13px;
 display: flex;
+flex-wrap: wrap;
+gap: 6px 12px;
 justify-content: space-between;
 color: #333;
 margin-bottom: 6px;
@@ -255,8 +267,8 @@ color: #777;
   left: 5%;
   top: 45%;
 
-  width: 450px;
-  height: 450px;
+  width: min(450px, 80vw);
+  height: min(450px, 80vw);
 
   pointer-events: none;
 
@@ -270,6 +282,23 @@ color: #777;
   mix-blend-mode: screen;
 
   animation: flashlight-flicker 6s infinite;
+}
+
+@media (max-width: 640px) {
+  .character-card:nth-child(2),
+  .character-card:nth-child(3),
+  .character-card:nth-child(4),
+  .character-card,
+  .character-card:hover {
+    transform: none;
+  }
+
+  .character-card:hover {
+    box-shadow:
+      0 30px 40px rgba(0,0,0,0.9),
+      0 5px 0 rgba(0,0,0,0.4),
+      inset 0 0 30px rgba(0,0,0,0.2);
+  }
 }
 
 @keyframes flashlight-flicker {
