@@ -1,30 +1,64 @@
-"use client";
+import CharacterCard from "@/components/CharacterCard";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+const characters = [
+{
+name: "НЕИЗВЕСТЕН",
+class: "???",
+subclass: "???",
+race: "???",
+subrace: "???",
+status: "???",
+avatar: "/characters/default1.png",
+backstory:
+"???"
+},
 
-import { getToken } from "@/lib/auth";
+{
+name: "НЕИЗВЕСТЕН",
+class: "???",
+subclass: "???",
+race: "???",
+subrace: "???",
+status: "???",
+avatar: "/characters/default2.png",
+backstory:
+"???"
+},
+
+{
+name: "НЕИЗВЕСТЕН",
+class: "???",
+subclass: "???",
+race: "???",
+subrace: "???",
+status: "???",
+avatar: "/characters/default3.png",
+backstory:
+"???"
+},
+
+{
+name: "НЕИЗВЕСТЕН",
+class: "???",
+subclass: "???",
+race: "???",
+subrace: "???",
+status: "???",
+avatar: "/characters/default4.png",
+backstory:
+"???"
+}
+];
 
 export default function CharactersPage() {
-  const router = useRouter();
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    if (!getToken()) {
-      router.replace("/login");
-      return;
-    }
-    setReady(true);
-  }, [router]);
-
-  if (!ready) {
-    return null;
-  }
-
   return (
-    <main className="mx-auto flex min-h-[calc(100vh-64px)] w-full max-w-6xl flex-col gap-3 px-6 py-8">
-      <h1 className="text-3xl font-semibold text-lumen-accent">Characters</h1>
-      <p className="text-gray-300">This section will display character cards.</p>
+    <main className="characters-page">
+      <div className="film-grain"></div>
+      <div className="desk">
+        {characters.map((c) => (
+          <CharacterCard key={c.name} character={c} />
+        ))}
+      </div>
     </main>
   );
 }

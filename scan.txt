@@ -1,0 +1,166 @@
+from sqlalchemy import Boolean, Column, Integer, String, Text
+
+from app.db.base import Base
+
+
+class Character(Base):
+    __tablename__ = "characters"
+
+    id = Column(Integer, primary_key=True)
+
+    name = Column(String, nullable=False)
+    avatar_url = Column(String)
+
+    race = Column(String)
+    class_name = Column(String)
+
+    backstory = Column(Text)
+
+    status = Column(String, default="alive")
+
+    is_visible_to_players = Column(Boolean, default=True)
+=== Router ===
+import enum
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel, ConfigDict, Field
+from sqlalchemy.orm import Session
+
+from app.auth.dependencies import get_current_active_user, get_current_gm, get_db
+from app.models import Character, User
+
+router = APIRouter(tags=["characters"])
+
+
+class CharacterStatus(str, enum.Enum):
+    ALIVE = "alive"
+    DEAD = "dead"
+    UNKNOWN = "unknown"
+
+
+class CharacterCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=120)
+    race: str | None = Field(default=None, max_length=120)
+    character_class: str | None = Field(default=None, max_length=120)
+    avatar_url: str | None = Field(default=None, max_length=500)
+    backstory: str | None = None
+    status: CharacterStatus = CharacterStatus.UNKNOWN
+
+
+class CharacterUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=1, max_length=120)
+    race: str | None = Field(default=None, max_length=120)
+    character_class: str | None = Field(default=None, max_length=120)
+    avatar_url: str | None = Field(default=None, max_length=500)
+    backstory: str | None = None
+    status: CharacterStatus | None = None
+
+
+class CharacterStatusUpdate(BaseModel):
+    status: CharacterStatus
+
+
+class CharacterResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    name: str
+    race: str | None
+    character_class: str | None
+    avatar_url: str | None
+    backstory: str | None
+    status: CharacterStatus
+
+
+def _to_response(character: Character) -> CharacterResponse:
+    try:
+        status = CharacterStatus(character.status)
+    except ValueError:
+        status = CharacterStatus.UNKNOWN
+
+    return CharacterResponse(
+        id=character.id,
+        name=character.name,
+        race=character.ancestry,
+        character_class=character.archetype,
+        avatar_url=character.portrait_url,
+        backstory=character.backstory,
+        status=status,
+    )
+
+
+@router.post("/gm/characters", response_model=CharacterResponse, status_code=status.HTTP_201_CREATED)
+def create_character(
+    payload: CharacterCreate,
+    _current_user: User = Depends(get_current_gm),
+    db: Session = Depends(get_db),
+) -> CharacterResponse:
+    character = Character(
+        name=payload.name,
+        ancestry=payload.race,
+        archetype=payload.character_class,
+        portrait_url=payload.avatar_url,
+        backstory=payload.backstory,
+        status=payload.status.value,
+    )
+    db.add(character)
+    db.commit()
+    db.refresh(character)
+    return _to_response(character)
+
+
+@router.patch("/gm/characters/{id}", response_model=CharacterResponse)
+def update_character(
+    id: int,
+    payload: CharacterUpdate,
+    _current_user: User = Depends(get_current_gm),
+    db: Session = Depends(get_db),
+) -> CharacterResponse:
+    character = db.query(Character).filter(Character.id == id).first()
+    if character is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Character not found")
+
+    updates = payload.model_dump(exclude_unset=True)
+    if "name" in updates:
+        character.name = updates["name"]
+    if "race" in updates:
+        character.ancestry = updates["race"]
+    if "character_class" in updates:
+        character.archetype = updates["character_class"]
+    if "avatar_url" in updates:
+        character.portrait_url = updates["avatar_url"]
+    if "backstory" in updates:
+        character.backstory = updates["backstory"]
+    if "status" in updates and updates["status"] is not None:
+        character.status = updates["status"].value
+
+    db.commit()
+    db.refresh(character)
+    return _to_response(character)
+
+
+@router.patch("/gm/characters/{id}/status", response_model=CharacterResponse)
+def update_character_status(
+    id: int,
+    payload: CharacterStatusUpdate,
+    _current_user: User = Depends(get_current_gm),
+    db: Session = Depends(get_db),
+) -> CharacterResponse:
+    character = db.query(Character).filter(Character.id == id).first()
+    if character is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Character not found")
+
+    character.status = payload.status.value
+    db.commit()
+    db.refresh(character)
+    return _to_response(character)
+
+
+@router.get("/characters", response_model=list[CharacterResponse])
+def list_characters(
+    _current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db),
+) -> list[CharacterResponse]:
+    characters = db.query(Character).order_by(Character.id.asc()).all()
+    return [_to_response(character) for character in characters]
+[?25l[37;49H(B[0;7m[ стр   3/146 ( 2%), стлб  1/12 (  8%), симв    2/4595 ( 0%) ](B[m[?12l[?25h[4d[39;1H[?1049l[23;0;0t[?1l>[?1049h[22;0;0t[1;38r[?12l[?25h[39;49m]104(B[m[4l[?7h[H[2J[?2004h[?1h=[?1h=(B[0;7m  GNU nano 7.2                                                   backend/app/routers/characters.py *                                                          [1;157H(B[m[4d(B[0;1m[36mimport[39m(B[m enum[6d(B[0;1m[36mfrom[39m(B[m fastapi (B[0;1m[36mimport[39m(B[m APIRouter, Depends, HTTPException, status[7d(B[0;1m[36mfrom[39m(B[m pydantic (B[0;1m[36mimport[39m(B[m BaseModel, ConfigDict, Field[8d(B[0;1m[36mfrom[39m(B[m sqlalchemy.orm (B[0;1m[36mimport[39m(B[m Session[10d(B[0;1m[36mfrom[39m(B[m app.auth.dependencies (B[0;1m[36mimport[39m(B[m get_current_active_user, get_current_gm, get_db[11d(B[0;1m[36mfrom[39m(B[m app.models (B[0;1m[36mimport[39m(B[m Character, User[13drouter = APIRouter(tags=[(B[0;1m[32m"characters"[39m(B[m])[16d(B[0;1m[36mclass[39m(B[m CharacterStatus(str, enum.Enum):[17;5HALIVE = (B[0;1m[32m"alive"[18;5H[39m(B[mDEAD = (B[0;1m[32m"dead"[19;5H[39m(B[mUNKNOWN = (B[0;1m[32m"unknown"[22d[36mclass[39m(B[m CharacterCreate(BaseModel):[23;5Hname: str = Field(min_length=1, max_length=120)[24;5Hrace: str | (B[0;1m[35mNone[39m(B[m = Field(default=(B[0;1m[35mNone[39m(B[m, max_length=120)[25;5Hcharacter_class: str | (B[0;1m[35mNone[39m(B[m = Field(default=(B[0;1m[35mNone[39m(B[m, max_length=120)[26;5Havatar_url: str | (B[0;1m[35mNone[39m(B[m = Field(default=(B[0;1m[35mNone[39m(B[m, max_length=500)[27;5Hbackstory: str | (B[0;1m[35mNone[39m(B[m = (B[0;1m[35mNone[28;5H[39m(B[mstatus: CharacterStatus = CharacterStatus.UNKNOWN[31d(B[0;1m[36mclass[39m(B[m CharacterUpdate(BaseModel):[32;5Hname: str | (B[0;1m[35mNone[39m(B[m = Field(default=(B[0;1m[35mNone[39m(B[m, min_length=1, max_length=120)[33;5Hrace: str | (B[0;1m[35mNone[39m(B[m = Field(default=(B[0;1m[35mNone[39m(B[m, max_length=120)[34;5Hcharacter_class: str | (B[0;1m[35mNone[39m(B[m = Field(default=(B[0;1m[35mNone[39m(B[m, max_length=120)[35;5Havatar_url: str | (B[0;1m[35mNone[39m(B[m = Field(default=(B[0;1m[35mNone[39m(B[m, max_length=500)[37d(B[0;7m^G(B[m Справка[18G(B[0;7m^O(B[m Записать[35G(B[0;7m^W(B[m Поиск[37;52H(B[0;7m^K(B[m Вырезать[69G(B[0;7m^T(B[m Выполнить     (B[0;7m^C(B[m Позиция[103G(B[0;7mM-U(B[m Отмена[120G(B[0;7mM-A(B[m Установить ме(B[0;7mM-](B[m На скобку[38d(B[0;7m^X(B[m Выход[38;18H(B[0;7m^R(B[m ЧитФайл[35G(B[0;7m^\(B[m Замена[38;52H(B[0;7m^U(B[m Вставить[69G(B[0;7m^J(B[m Выровнять     (B[0;7m^/(B[m К строке[103G(B[0;7mM-E(B[m Повтор[120G(B[0;7mM-6(B[m Копировать   (B[0;7m^Q(B[m Обр. поиск[?25l[?12l[?25h[4d[?25l[?12l[?25h[?25l[36;49H(B[0;7m[ стр   3/146 ( 2%), стлб  1/12 (  8%), симв    2/4595 ( 0%) ](B[m[?12l[?25h[4d[?25l[?12l[?25h[5d[?25l[36;57H(B[0;7m4[36;78H 1 (100[36;96H14[36;111H(B[m[?12l[?25h[5d[38;1H[?1049l[23;0;0t[?1l>[?2004l[?1l>[?1049h[22;0;0t[1;38r[?12l[?25h[39;49m]104(B[m[4l[?7h[H[2J(B[0;7m  GNU nano 7.2                                                   backend/app/routers/characters.py *                                                          [4;1H(B[0;1m[36mimport[39m(B[m enum[6d(B[0;1m[36mfrom[39m(B[m fastapi (B[0;1m[36mimport[39m(B[m APIRouter, Depends, HTTPException, status[7d(B[0;1m[36mfrom[39m(B[m pydantic (B[0;1m[36mimport[39m(B[m BaseModel, ConfigDict, Field[8d(B[0;1m[36mfrom[39m(B[m sqlalchemy.orm (B[0;1m[36mimport[39m(B[m Session[10d(B[0;1m[36mfrom[39m(B[m app.auth.dependencies (B[0;1m[36mimport[39m(B[m get_current_active_user, get_current_gm, get_db[11d(B[0;1m[36mfrom[39m(B[m app.models (B[0;1m[36mimport[39m(B[m Character, User[13drouter = APIRouter(tags=[(B[0;1m[32m"characters"[39m(B[m])[16d(B[0;1m[36mclass[39m(B[m CharacterStatus(str, enum.Enum):[17;5HALIVE = (B[0;1m[32m"alive"[18;5H[39m(B[mDEAD = (B[0;1m[32m"dead"[19;5H[39m(B[mUNKNOWN = (B[0;1m[32m"unknown"[22d[36mclass[39m(B[m CharacterCreate(BaseModel):[23;5Hname: str = Field(min_length=1, max_length=120)[24;5Hrace: str | (B[0;1m[35mNone[39m(B[m = Field(default=(B[0;1m[35mNone[39m(B[m, max_length=120)[25;5Hcharacter_class: str | (B[0;1m[35mNone[39m(B[m = Field(default=(B[0;1m[35mNone[39m(B[m, max_length=120)[26;5Havatar_url: str | (B[0;1m[35mNone[39m(B[m = Field(default=(B[0;1m[35mNone[39m(B[m, max_length=500)[27;5Hbackstory: str | (B[0;1m[35mNone[39m(B[m = (B[0;1m[35mNone[28;5H[39m(B[mstatus: CharacterStatus = CharacterStatus.UNKNOWN[31d(B[0;1m[36mclass[39m(B[m CharacterUpdate(BaseModel):[32;5Hname: str | (B[0;1m[35mNone[39m(B[m = Field(default=(B[0;1m[35mNone[39m(B[m, min_length=1, max_length=120)[33;5Hrace: str | (B[0;1m[35mNone[39m(B[m = Field(default=(B[0;1m[35mNone[39m(B[m, max_length=120)[34;5Hcharacter_class: str | (B[0;1m[35mNone[39m(B[m = Field(default=(B[0;1m[35mNone[39m(B[m, max_length=120)[35;5Havatar_url: str | (B[0;1m[35mNone[39m(B[m = Field(default=(B[0;1m[35mNone[39m(B[m, max_length=500)[36;49H(B[0;7m[ стр   4/146 ( 2%), стлб  1/ 1 (100%), симв   14/4595 ( 0%) ][37d^G(B[m Справка[18G(B[0;7m^O(B[m Записать[35G(B[0;7m^W(B[m Поиск[37;52H(B[0;7m^K(B[m Вырезать[69G(B[0;7m^T(B[m Выполнить     (B[0;7m^C(B[m Позиция[103G(B[0;7mM-U(B[m Отмена[120G(B[0;7mM-A(B[m Установить ме(B[0;7mM-](B[m На скобку[38d(B[0;7m^X(B[m Выход[38;18H(B[0;7m^R(B[m ЧитФайл[35G(B[0;7m^\(B[m Замена[38;52H(B[0;7m^U(B[m Вставить[69G(B[0;7m^J(B[m Выровнять     (B[0;7m^/(B[m К строке[103G(B[0;7mM-E(B[m Повтор[120G(B[0;7mM-6(B[m Копировать   (B[0;7m^Q(B[m Обр. поиск[H[?2004h[?1h=[?1h=[36d[J[1;157H[37d(B[0;7m^G(B[m Справка[18G(B[0;7m^O(B[m Записать[35G(B[0;7m^W(B[m Поиск[37;52H(B[0;7m^K(B[m Вырезать[69G(B[0;7m^T(B[m Выполнить     (B[0;7m^C(B[m Позиция[103G(B[0;7mM-U(B[m Отмена[120G(B[0;7mM-A(B[m Установить ме(B[0;7mM-](B[m На скобку[38d(B[0;7m^X(B[m Выход[38;18H(B[0;7m^R(B[m ЧитФайл[35G(B[0;7m^\(B[m Замена[38;52H(B[0;7m^U(B[m Вставить[69G(B[0;7m^J(B[m Выровнять     (B[0;7m^/(B[m К строке[103G(B[0;7mM-E(B[m Повтор[120G(B[0;7mM-6(B[m Копировать   (B[0;7m^Q(B[m Обр. поиск
