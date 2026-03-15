@@ -4,7 +4,7 @@ type ApiFetchOptions = RequestInit & {
   withAuth?: boolean;
 };
 
-const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000").replace(/\/$/, "");
+const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://46.16.36.156:8000").replace(/\/$/, "");
 
 function toUrl(pathOrUrl: string): string {
   if (pathOrUrl.startsWith("http://") || pathOrUrl.startsWith("https://")) {
