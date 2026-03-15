@@ -23,12 +23,15 @@ static_dir = Path(__file__).resolve().parents[1] / "static"
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://lumen-protocol.oxytocin.moe:3000", # Домен друга
+        "http://46.16.36.156:3000",               # Твой IP
+        "http://localhost:3000",                 # Локалка
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 app.include_router(auth_router)
 app.include_router(gm_router)
