@@ -1,42 +1,13 @@
-from pydantic import BaseModel, ConfigDict, Field
+from typing import Any
+
 from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel, ConfigDict
 from sqlalchemy.orm import Session
 
-from app.auth.dependencies import get_current_active_user, get_current_gm, get_db
-from app.models import Map, MapMarker, User
-from app.models.user import UserRole
+from app.auth.dependencies import get_current_active_user, get_db
+from app.models import Map, MapElement, MapLayer, User
 
 router = APIRouter(tags=["maps"])
-
-
-class MapCreate(BaseModel):
-    name: str = Field(min_length=1, max_length=150)
-    description: str | None = None
-    image_url: str = Field(min_length=1, max_length=500)
-
-
-class MapMarkerCreate(BaseModel):
-    map_id: int
-    title: str = Field(min_length=1, max_length=150)
-    description: str
-    x: float = Field(ge=0.0, le=1.0)
-    y: float = Field(ge=0.0, le=1.0)
-    icon_type: str = Field(min_length=1, max_length=64)
-    is_visible: bool = False
-
-
-class MapMarkerResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int
-    map_id: int
-    title: str
-    description: str | None
-    x: float
-    y: float
-    icon_type: str | None
-    is_visible: bool
-    created_by_id: int
 
 
 class MapResponse(BaseModel):
@@ -44,109 +15,104 @@ class MapResponse(BaseModel):
 
     id: int
     name: str
-    description: str | None
-    image_url: str | None
+    image_url: str
+    width: int
+    height: int
+    is_visible_to_players: bool
     created_by_id: int
-    markers: list[MapMarkerResponse]
 
 
-def _serialize_marker(marker: MapMarker) -> MapMarkerResponse:
-    return MapMarkerResponse(
-        id=marker.id,
-        map_id=marker.map_id,
-        title=marker.title,
-        description=marker.description,
-        x=marker.x_coordinate,
-        y=marker.y_coordinate,
-        icon_type=marker.icon,
-        is_visible=not marker.is_hidden,
-        created_by_id=marker.created_by_id,
-    )
+class MapLayerResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    map_id: int
+    name: str
+    order_index: int
+    is_visible_to_players: bool
 
 
-def _serialize_map(campaign_map: Map, markers: list[MapMarker]) -> MapResponse:
-    return MapResponse(
-        id=campaign_map.id,
-        name=campaign_map.name,
-        description=campaign_map.description,
-        image_url=campaign_map.image_url,
-        created_by_id=campaign_map.created_by_id,
-        markers=[_serialize_marker(marker) for marker in markers],
-    )
+class MapElementResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    layer_id: int
+    type: str
+    x: float
+    y: float
+    data: dict[str, Any]
+    is_visible_to_players: bool
 
 
-@router.post("/gm/maps", response_model=MapResponse, status_code=status.HTTP_201_CREATED)
-def create_map(
-    payload: MapCreate,
-    current_user: User = Depends(get_current_gm),
+def _map_to_response(campaign_map: Map) -> MapResponse:
+    return MapResponse.model_validate(campaign_map)
+
+
+def _layer_to_response(layer: MapLayer) -> MapLayerResponse:
+    return MapLayerResponse.model_validate(layer)
+
+
+def _element_to_response(element: MapElement) -> MapElementResponse:
+    return MapElementResponse.model_validate(element)
+
+
+@router.get("/maps", response_model=list[MapResponse])
+def list_maps(
+    _current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
-) -> MapResponse:
-    campaign_map = Map(
-        name=payload.name,
-        description=payload.description,
-        image_url=payload.image_url,
-        created_by_id=current_user.id,
-    )
-    db.add(campaign_map)
-    db.commit()
-    db.refresh(campaign_map)
-    return _serialize_map(campaign_map, [])
-
-
-@router.post("/gm/map-markers", response_model=MapMarkerResponse, status_code=status.HTTP_201_CREATED)
-def create_map_marker(
-    payload: MapMarkerCreate,
-    current_user: User = Depends(get_current_gm),
-    db: Session = Depends(get_db),
-) -> MapMarkerResponse:
-    campaign_map = db.query(Map).filter(Map.id == payload.map_id).first()
-    if campaign_map is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Map not found")
-
-    marker = MapMarker(
-        map_id=payload.map_id,
-        title=payload.title,
-        description=payload.description,
-        x_coordinate=payload.x,
-        y_coordinate=payload.y,
-        icon=payload.icon_type,
-        is_hidden=not payload.is_visible,
-        created_by_id=current_user.id,
-    )
-    db.add(marker)
-    db.commit()
-    db.refresh(marker)
-    return _serialize_marker(marker)
-
-
-@router.patch("/gm/map-markers/{id}/reveal", response_model=MapMarkerResponse)
-def reveal_map_marker(
-    id: int,
-    _current_user: User = Depends(get_current_gm),
-    db: Session = Depends(get_db),
-) -> MapMarkerResponse:
-    marker = db.query(MapMarker).filter(MapMarker.id == id).first()
-    if marker is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Marker not found")
-
-    marker.is_hidden = False
-    db.commit()
-    db.refresh(marker)
-    return _serialize_marker(marker)
+) -> list[MapResponse]:
+    maps = db.query(Map).filter(Map.is_visible_to_players.is_(True)).order_by(Map.id.asc()).all()
+    return [_map_to_response(campaign_map) for campaign_map in maps]
 
 
 @router.get("/maps/{map_id}", response_model=MapResponse)
 def get_map(
     map_id: int,
-    current_user: User = Depends(get_current_active_user),
+    _current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ) -> MapResponse:
-    campaign_map = db.query(Map).filter(Map.id == map_id).first()
+    campaign_map = db.query(Map).filter(Map.id == map_id, Map.is_visible_to_players.is_(True)).first()
+    if campaign_map is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Map not found")
+    return _map_to_response(campaign_map)
+
+
+@router.get("/maps/{map_id}/layers", response_model=list[MapLayerResponse])
+def list_map_layers(
+    map_id: int,
+    _current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db),
+) -> list[MapLayerResponse]:
+    campaign_map = db.query(Map).filter(Map.id == map_id, Map.is_visible_to_players.is_(True)).first()
     if campaign_map is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Map not found")
 
-    markers_query = db.query(MapMarker).filter(MapMarker.map_id == campaign_map.id)
-    if current_user.role != UserRole.GM:
-        markers_query = markers_query.filter(MapMarker.is_hidden.is_(False))
-    markers = markers_query.order_by(MapMarker.id.asc()).all()
-    return _serialize_map(campaign_map, markers)
+    layers = (
+        db.query(MapLayer)
+        .filter(MapLayer.map_id == map_id, MapLayer.is_visible_to_players.is_(True))
+        .order_by(MapLayer.order_index.asc(), MapLayer.id.asc())
+        .all()
+    )
+    return [_layer_to_response(layer) for layer in layers]
+
+
+@router.get("/maps/layers/{layer_id}/elements", response_model=list[MapElementResponse])
+def list_map_elements(
+    layer_id: int,
+    _current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db),
+) -> list[MapElementResponse]:
+    layer = db.query(MapLayer).filter(MapLayer.id == layer_id, MapLayer.is_visible_to_players.is_(True)).first()
+    if layer is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Layer not found")
+
+    if not layer.map.is_visible_to_players:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Map not found")
+
+    elements = (
+        db.query(MapElement)
+        .filter(MapElement.layer_id == layer_id, MapElement.is_visible_to_players.is_(True))
+        .order_by(MapElement.id.asc())
+        .all()
+    )
+    return [_element_to_response(element) for element in elements]

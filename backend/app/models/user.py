@@ -53,5 +53,4 @@ class User(Base):
         "WikiEntry", back_populates="updated_by", foreign_keys="WikiEntry.updated_by_id"
     )
     created_maps = relationship("Map", back_populates="created_by")
-    created_map_markers = relationship("MapMarker", back_populates="created_by")
     created_timers = relationship("Timer", back_populates="created_by")

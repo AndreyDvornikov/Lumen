@@ -9,3 +9,315 @@
 body {
   @apply bg-lumen-bg text-slate-100;
 }
+.characters-page {
+
+  position: relative;
+
+  min-height: 100vh;
+  padding: 80px 40px;
+
+  background:
+    radial-gradient(circle at center, rgba(0,0,0,0.35), rgba(0,0,0,0.9)),
+    url("/desk.webp");
+
+  background-size: cover;
+  background-position: center;
+}
+.characters-page::before {
+
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  pointer-events: none;
+  z-index: 0;
+
+  background:
+    radial-gradient(
+      ellipse 900px 700px at 50% 35%,
+      rgba(255,230,180,0.35) 0%,
+      rgba(255,230,180,0.18) 25%,
+      rgba(255,230,180,0.06) 40%,
+      transparent 60%
+    );
+
+  mix-blend-mode: soft-light;
+
+}
+
+.characters-page::after {
+
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background:
+    radial-gradient(circle at 20% 40%,
+      rgba(0,0,0,0) 0%,
+      rgba(0,0,0,0.35) 40%,
+      rgba(0,0,0,0.7) 80%);
+
+  pointer-events: none;
+}
+
+/* стол */
+
+.desk {
+  max-width: 1100px;
+  margin: auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 60px;
+  justify-items: center;
+}
+
+/* папка персонажа */
+
+.character-card {
+
+  width: 320px;
+
+  background: #e7d8b8;
+
+  box-shadow:
+
+    /* контактная тень */
+    0 6px 6px rgba(0,0,0,0.6),
+
+    /* большая тень от лампы */
+    0 45px 70px rgba(0,0,0,0.85),
+
+    /* внутренняя текстура бумаги */
+    inset 0 0 25px rgba(0,0,0,0.18);
+  filter: brightness(0.92) contrast(0.95);
+
+}
+
+.characters-page .film-grain {
+
+  position: absolute;
+  inset: 0;
+
+  pointer-events: none;
+
+  background: url("/grain.png");
+
+  opacity: 0.05;
+}
+
+.character-card:nth-child(2) {
+  transform: rotate(2deg);
+}
+
+.character-card:nth-child(3) {
+  transform: rotate(-3deg);
+}
+
+.character-card:nth-child(4) {
+  transform: rotate(3deg);
+}
+
+.character-card:hover {
+  transform: rotate(0deg) scale(1.05);
+  box-shadow:
+    0 20px 50px rgba(0,0,0,0.8),
+    inset 0 0 50px rgba(0,0,0,0.2);
+}
+
+/* фото */
+
+.character-photo {
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+  border: 2px solid #2a1a0f;
+  margin-bottom: 10px;
+}
+
+.character-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* текст */
+
+.character-info h2 {
+  font-size: 20px;
+  color: #111;
+  margin-bottom: 6px;
+}
+
+.role {
+  font-weight: bold;
+  font-size: 14px;
+  color: #7a1e10;
+  margin-bottom: 8px;
+}
+
+.desc {
+  font-size: 13px;
+  color: #333;
+  line-height: 1.4;
+}
+
+.character-card {
+
+width: 320px;
+
+background: #f3e6c9;
+border-radius: 6px;
+
+padding: 20px;
+
+box-shadow:
+0 20px 40px rgba(0,0,0,0.7),
+inset 0 0 30px rgba(0,0,0,0.15);
+
+transform: rotate(-2deg);
+transition: 0.25s;
+
+cursor: pointer;
+box-shadow:
+
+  0 30px 40px rgba(0,0,0,0.9),
+  0 5px 0 rgba(0,0,0,0.4),
+  inset 0 0 30px rgba(0,0,0,0.2);
+}
+
+.character-card:hover {
+transform: rotate(0deg) scale(1.05);
+}
+
+.character-avatar {
+
+height: 180px;
+border: 2px solid #3a2a18;
+margin-bottom: 10px;
+overflow: hidden;
+}
+
+.character-avatar img {
+
+width: 100%;
+height: 100%;
+object-fit: cover;
+}
+
+.character-name {
+
+font-size: 20px;
+font-weight: bold;
+margin-bottom: 6px;
+color: #111;
+}
+
+.character-meta {
+
+font-size: 13px;
+display: flex;
+justify-content: space-between;
+color: #333;
+margin-bottom: 6px;
+}
+
+.character-backstory {
+
+font-size: 12px;
+line-height: 1.4;
+color: #222;
+margin-top: 8px;
+}
+
+.status {
+
+margin-top: 6px;
+font-size: 11px;
+font-weight: bold;
+text-transform: uppercase;
+}
+
+.status.alive {
+color: #2c7a2c;
+}
+
+.status.dead {
+color: #9b1c1c;
+}
+
+.status.unknown {
+color: #777;
+}
+
+.flashlight {
+
+  position: absolute;
+  left: 5%;
+  top: 45%;
+
+  width: 450px;
+  height: 450px;
+
+  pointer-events: none;
+
+  background:
+    radial-gradient(circle,
+      rgba(255,255,220,0.18) 0%,
+      rgba(255,255,220,0.08) 30%,
+      rgba(255,255,220,0.02) 50%,
+      transparent 70%);
+
+  mix-blend-mode: screen;
+
+  animation: flashlight-flicker 6s infinite;
+}
+
+@keyframes flashlight-flicker {
+
+  0% { opacity: 0.7; }
+  5% { opacity: 0.3; }
+  7% { opacity: 0.8; }
+  10% { opacity: 0.6; }
+  40% { opacity: 0.75; }
+  60% { opacity: 0.65; }
+  100% { opacity: 0.7; }
+
+}
+
+.desk-lamp {
+
+  position: absolute;
+  top: -120px;
+  left: 50%;
+
+  width: 120px;
+  height: 120px;
+
+  transform: translateX(-50%);
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(255,230,150,0.9) 0%,
+      rgba(255,200,100,0.5) 40%,
+      rgba(255,200,100,0) 70%
+    );
+
+  filter: blur(25px);
+
+  animation: lamp-flicker 8s infinite;
+}
+
+@keyframes lamp-flicker {
+
+  0% { opacity: 0.9; }
+  5% { opacity: 0.6; }
+  7% { opacity: 0.95; }
+  30% { opacity: 0.85; }
+  50% { opacity: 0.8; }
+  80% { opacity: 0.9; }
+  100% { opacity: 0.88; }
+
+}
