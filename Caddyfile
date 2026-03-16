@@ -1,0 +1,9 @@
+lumen-protocol.oxytocin.moe {
+    # Прокси на фронтенд (Next.js)
+    reverse_proxy frontend:3000
+
+    # Прокси на бэкенд (FastAPI)
+    handle_path /api/* {
+        reverse_proxy backend:8000
+    }
+}
