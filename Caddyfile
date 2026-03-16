@@ -1,10 +1,12 @@
 lumen-protocol.oxytocin.moe {
-    # Сначала перехватываем все запросы к бэкенду
-    reverse_proxy /api/* backend:8000
-    reverse_proxy /auth/* backend:8000
-    reverse_proxy /health backend:8000
-    reverse_proxy /ws/* backend:8000
+    # 1. Отдаем загруженные картинки из вики напрямую бэкенду
+    reverse_proxy /static/* backend:8000
 
-    # Всё остальное (сам интерфейс сайта) отправляем на фронтенд
+    # 2. Ловим все запросы к API, отрезаем префикс /api и кидаем в бэкенд
+    handle_path /api/* {
+        reverse_proxy backend:8000
+    }
+
+    # 3. Все остальные запросы (сам сайт) идут на фронт
     reverse_proxy frontend:3000
 }

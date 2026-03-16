@@ -20,7 +20,7 @@ services:
     command: npm run dev -- --hostname 0.0.0.0 --port 3000
     environment:
       - NEXT_TELEMETRY_DISABLED=1
-      - NEXT_PUBLIC_API_BASE_URL=https://lumen-protocol.oxytocin.moe # <-- ДОБАВИТЬ ЭТУ СТРОКУ
+      - NEXT_PUBLIC_API_BASE_URL=https://lumen-protocol.oxytocin.moe/api # <-- ДОБАВИТЬ ЭТУ СТРОКУ
     depends_on:
       - backend
     volumes:
