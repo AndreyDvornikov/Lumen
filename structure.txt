@@ -1,0 +1,162 @@
+.
+├── backend
+│   ├── app
+│   │   ├── auth
+│   │   │   ├── dependencies.py
+│   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── dependencies.cpython-312.pyc
+│   │   │   │   ├── __init__.cpython-312.pyc
+│   │   │   │   ├── router.cpython-312.pyc
+│   │   │   │   ├── schemas.cpython-312.pyc
+│   │   │   │   └── security.cpython-312.pyc
+│   │   │   ├── router.py
+│   │   │   ├── schemas.py
+│   │   │   └── security.py
+│   │   ├── cache.py
+│   │   ├── config.py
+│   │   ├── database.py
+│   │   ├── __init__.py
+│   │   ├── main.py
+│   │   ├── models
+│   │   │   ├── game_state.py
+│   │   │   ├── __init__.py
+│   │   │   ├── map.py
+│   │   │   ├── player.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── character.cpython-312.pyc
+│   │   │   │   ├── game_state.cpython-312.pyc
+│   │   │   │   ├── __init__.cpython-312.pyc
+│   │   │   │   ├── map.cpython-312.pyc
+│   │   │   │   ├── player.cpython-312.pyc
+│   │   │   │   ├── timer.cpython-312.pyc
+│   │   │   │   ├── user.cpython-312.pyc
+│   │   │   │   └── wiki.cpython-312.pyc
+│   │   │   ├── timer.py
+│   │   │   ├── user.py
+│   │   │   └── wiki.py
+│   │   ├── __pycache__
+│   │   │   ├── cache.cpython-312.pyc
+│   │   │   ├── config.cpython-312.pyc
+│   │   │   ├── database.cpython-312.pyc
+│   │   │   ├── __init__.cpython-312.pyc
+│   │   │   ├── main.cpython-312.pyc
+│   │   │   └── realtime.cpython-312.pyc
+│   │   ├── realtime.py
+│   │   └── routers
+│   │       ├── characters.py.save
+│   │       ├── gm.py
+│   │       ├── __init__.py
+│   │       ├── maps.py
+│   │       ├── __pycache__
+│   │       │   ├── characters.cpython-312.pyc
+│   │       │   ├── gm.cpython-312.pyc
+│   │       │   ├── __init__.cpython-312.pyc
+│   │       │   ├── maps.cpython-312.pyc
+│   │       │   ├── timers.cpython-312.pyc
+│   │       │   ├── uploads.cpython-312.pyc
+│   │       │   └── wiki.cpython-312.pyc
+│   │       ├── timers.py
+│   │       ├── uploads.py
+│   │       └── wiki.py
+│   ├── Dockerfile
+│   ├── .env.example
+│   ├── requirements.txt
+│   └── static
+│       └── uploads
+│           ├── 06a7eccf02ce41268589c480f032c809.jpg
+│           ├── 1cfb799ba55e4beb94a1dd60808befb4.png
+│           ├── 6c508a17604e45309a4ac2b4f03d1d4c.jpg
+│           └── b56b1d06799d4544a498e119f29bc24c.png
+├── Caddyfile
+├── docker-compose.yml
+├── Dockerfile.caddy
+├── docs
+│   └── lumen_protocol_TZ_v2.docx
+├── frontend
+│   ├── Dockerfile
+│   ├── next.config.mjs
+│   ├── next-env.d.ts
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── postcss.config.mjs
+│   ├── public
+│   │   ├── characters
+│   │   │   ├── default1.png
+│   │   │   ├── default2.png
+│   │   │   ├── default3.png
+│   │   │   └── default4.png
+│   │   ├── desk.webp
+│   │   ├── grain.webp
+│   │   ├── images
+│   │   │   └── hero.png
+│   │   ├── logo.pbm
+│   │   ├── logo.png
+│   │   └── logo.svg
+│   ├── src
+│   │   ├── app
+│   │   │   ├── characters
+│   │   │   │   └── page.tsx
+│   │   │   ├── globals.css
+│   │   │   ├── gm
+│   │   │   │   ├── maps
+│   │   │   │   │   ├── [mapId]
+│   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   └── page.tsx
+│   │   │   │   ├── players
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── wiki
+│   │   │   │       ├── edit
+│   │   │   │       │   └── [id]
+│   │   │   │       │       └── page.tsx
+│   │   │   │       └── page.tsx
+│   │   │   ├── layout.tsx
+│   │   │   ├── login
+│   │   │   │   └── page.tsx
+│   │   │   ├── map
+│   │   │   │   └── page.tsx
+│   │   │   ├── maps
+│   │   │   │   └── page.tsx
+│   │   │   ├── page.tsx
+│   │   │   ├── videos
+│   │   │   │   └── page.tsx
+│   │   │   └── wiki
+│   │   │       ├── category
+│   │   │       │   └── [id]
+│   │   │       │       └── page.tsx
+│   │   │       ├── [id]
+│   │   │       │   └── page.tsx
+│   │   │       └── page.tsx
+│   │   ├── components
+│   │   │   ├── CampaignMapPage.tsx
+│   │   │   ├── CampaignMap.tsx
+│   │   │   ├── CharacterCard.tsx
+│   │   │   ├── Navbar.tsx
+│   │   │   ├── ui
+│   │   │   │   └── ImageInput.tsx
+│   │   │   └── wiki
+│   │   │       ├── editor
+│   │   │       │   ├── WikiEditor.tsx
+│   │   │       │   └── WikiToolbar.tsx
+│   │   │       ├── types.ts
+│   │   │       ├── utils.ts
+│   │   │       ├── WikiArticle.tsx
+│   │   │       ├── WikiCategoryGrid.tsx
+│   │   │       ├── WikiEntryCard.tsx
+│   │   │       ├── WikiSearch.tsx
+│   │   │       └── WikiTagList.tsx
+│   │   └── lib
+│   │       ├── api.ts
+│   │       └── auth.ts
+│   ├── tailwind.config.ts
+│   └── tsconfig.json
+├── .gitignore
+├── package-lock.json
+├── part_aa
+├── README.md
+├── repo_dump.json
+├── repo_dump.txt
+├── scan.txt
+└── structure.txt
+
+40 directories, 120 files

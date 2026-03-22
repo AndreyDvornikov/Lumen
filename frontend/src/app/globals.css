@@ -249,15 +249,15 @@ font-weight: bold;
 text-transform: uppercase;
 }
 
-.status.alive {
+.status.Жив {
 color: #2c7a2c;
 }
 
-.status.dead {
+.status.Мёртв {
 color: #9b1c1c;
 }
 
-.status.unknown {
+.status.НЕИЗВЕСТНО {
 color: #777;
 }
 

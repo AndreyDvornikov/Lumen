@@ -62,10 +62,12 @@ export default function GmWikiPage() {
 
     try {
       const user = await apiFetch<AuthUser>("/auth/me");
+
       if (user.role !== "gm") {
         router.replace("/wiki");
         return;
       }
+
       setCurrentUser(user);
 
       const [categoryData, entryData] = await Promise.all([
@@ -75,6 +77,7 @@ export default function GmWikiPage() {
 
       setCategories(categoryData);
       setEntries(entryData);
+
       setCategoryDrafts(
         Object.fromEntries(
           categoryData.map((category) => [
@@ -88,6 +91,7 @@ export default function GmWikiPage() {
           ])
         )
       );
+
       setNewArticle((current) => ({
         ...current,
         category_id: current.category_id || String(categoryData[0]?.id ?? ""),
@@ -98,6 +102,7 @@ export default function GmWikiPage() {
         router.replace("/login");
         return;
       }
+
       setError(err instanceof Error ? err.message : "Failed to load GM wiki panel");
     } finally {
       setLoading(false);
@@ -109,6 +114,7 @@ export default function GmWikiPage() {
       router.replace("/login");
       return;
     }
+
     void loadData();
   }, [loadData, router]);
 
@@ -126,6 +132,7 @@ export default function GmWikiPage() {
           description: newCategory.description || null,
         }),
       });
+
       setNewCategory(DEFAULT_CATEGORY_FORM);
       await loadData();
     } catch (err) {
@@ -135,9 +142,7 @@ export default function GmWikiPage() {
 
   async function saveCategory(categoryId: number) {
     const draft = categoryDrafts[categoryId];
-    if (!draft) {
-      return;
-    }
+    if (!draft) return;
 
     try {
       await apiFetch<WikiCategory>(`/gm/wiki/categories/${categoryId}`, {
@@ -150,6 +155,7 @@ export default function GmWikiPage() {
           description: draft.description || null,
         }),
       });
+
       await loadData();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update category");
@@ -188,6 +194,7 @@ export default function GmWikiPage() {
 
       setNewArticle(DEFAULT_ARTICLE_FORM);
       setIsArticleSlugEdited(false);
+
       router.push(`/gm/wiki/edit/${created.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create article");
@@ -196,7 +203,7 @@ export default function GmWikiPage() {
 
   async function unlockEntry(entryId: number) {
     try {
-      await apiFetch<WikiEntry>(`/gm/wiki/entries/${entryId}/unlock`, { method: "PATCH" });
+      await apiFetch(`/gm/wiki/entries/${entryId}/unlock`, { method: "PATCH" });
       await loadData();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to unlock article");
@@ -341,9 +348,7 @@ export default function GmWikiPage() {
         <div className="grid gap-4 lg:grid-cols-2">
           {categories.map((category) => {
             const draft = categoryDrafts[category.id];
-            if (!draft) {
-              return null;
-            }
+            if (!draft) return null;
 
             return (
               <div key={category.id} className="space-y-3 rounded-2xl border border-lumen-dark bg-lumen-bg p-5">
@@ -412,7 +417,7 @@ export default function GmWikiPage() {
               <div className="space-y-1">
                 <p className="text-lg font-semibold text-slate-100">{entry.title}</p>
                 <p className="text-sm text-slate-400">
-                  {categories.find((category) => category.id === entry.category_id)?.name ?? "Unknown category"} ·{" "}
+                  {categories.find((c) => c.id === entry.category_id)?.name ?? "Unknown"} ·{" "}
                   {visibilityLabel(entry.visibility_state)}
                 </p>
               </div>
@@ -433,7 +438,7 @@ export default function GmWikiPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => void deleteEntry(entry.id)}
+                  onClick={() => deleteEntry(entry.id)}
                   className="rounded-xl border border-rose-900 px-4 py-2 text-sm text-rose-300 transition hover:bg-rose-950/40"
                 >
                   Delete

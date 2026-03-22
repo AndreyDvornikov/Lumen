@@ -1,12 +1,20 @@
 import asyncio
 from pathlib import Path
 
-from fastapi import Depends, FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import (
+    Depends,
+    FastAPI,
+    HTTPException,
+    Query,
+    WebSocket,
+    WebSocketDisconnect,
+)
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 from app.auth.dependencies import get_current_active_user
 from app.auth.router import router as auth_router
+from app.auth.security import decode_access_token
 from app.cache import redis_client
 from app.config import get_settings
 from app.database import init_db
@@ -24,9 +32,8 @@ static_dir = Path(__file__).resolve().parents[1] / "static"
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://lumen-protocol.oxytocin.moe",  # Домен друга
-        "http://46.16.36.156:3000",  # Твой IP
-        "http://localhost:3000",  # Локалка
+        "http://localhost:3000",
+        "https://lumen-protocol.oxytocin.moe",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -39,7 +46,6 @@ app.include_router(maps_router)
 app.include_router(timers_router)
 app.include_router(uploads_router)
 app.include_router(wiki_router)
-app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 
 @app.on_event("startup")
@@ -47,6 +53,31 @@ def startup_event() -> None:
     init_db()
     (static_dir / "uploads").mkdir(parents=True, exist_ok=True)
     campaign_socket_manager.set_loop(asyncio.get_event_loop())
+
+
+# 🔐 Защищённая отдача изображений (FIXED)
+@app.get("/protected-image/{filename:path}")
+def get_protected_image(
+    filename: str,
+    token: str = Query(...),
+):
+    # 🔐 проверка токена
+    try:
+        decode_access_token(token, settings.jwt_secret_key)
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    uploads_dir = (static_dir / "uploads").resolve()
+    file_path = (uploads_dir / filename).resolve()
+
+    # защита от ../../
+    if not str(file_path).startswith(str(uploads_dir)):
+        raise HTTPException(status_code=400, detail="Invalid path")
+
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="File not found")
+
+    return FileResponse(file_path)
 
 
 @app.get("/health")
@@ -65,7 +96,18 @@ def system_status(_=Depends(get_current_active_user)) -> dict[str, str | int]:
 
 
 @app.websocket("/ws/campaign/{campaign_id}")
-async def campaign_socket(websocket: WebSocket, campaign_id: str) -> None:
+async def campaign_socket(
+    websocket: WebSocket,
+    campaign_id: str,
+    token: str = Query(...),
+) -> None:
+    # 🔐 проверка токена
+    try:
+        decode_access_token(token, settings.jwt_secret_key)
+    except Exception:
+        await websocket.close(code=1008)
+        return
+
     await campaign_socket_manager.connect(campaign_id, websocket)
 
     join_message = f"Joined campaign {campaign_id}"

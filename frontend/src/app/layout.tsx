@@ -6,6 +6,9 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Lumen Protocol",
   description: "Campaign portal for tabletop RPG sessions.",
+  icons: {
+    icon: "/logo.svg",
+  },
 };
 
 export const viewport: Viewport = {

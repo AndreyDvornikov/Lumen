@@ -1,14 +1,42 @@
-# Python
+# =========================
+# 🗄 Postgres data (dev only)
+# =========================
+postgres_data/
+
+# =========================
+# 🖼 Uploads (user + protected assets)
+# =========================
+backend/static/uploads/
+
+# =========================
+# 🧪 Dumps / debug
+# =========================
+repo_dump.json
+repo_tree.txt
+openapi.json
+*.log
+*.tmp
+*.dump
+*.bak
+
+# =========================
+# 🐍 Python
+# =========================
 __pycache__/
-*.py[cod]
-.venv/
-
-# Node
-node_modules/
-.next/
-
-# Env
+*.pyc
+*.pyo
+*.pyd
+venv/
 .env
 
-# Misc
-.DS_Store
+# =========================
+# ⚛️ Next.js / frontend
+# =========================
+node_modules/
+.next/
+out/
+
+# =========================
+# 🐳 Docker (если появятся)
+# =========================
+*.tar

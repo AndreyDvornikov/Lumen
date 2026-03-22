@@ -4,7 +4,7 @@ type ApiFetchOptions = RequestInit & {
   withAuth?: boolean;
 };
 
-const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://46.16.36.156:8000").replace(/\/$/, "");
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
 function toUrl(pathOrUrl: string): string {
   if (pathOrUrl.startsWith("http://") || pathOrUrl.startsWith("https://")) {
@@ -15,6 +15,28 @@ function toUrl(pathOrUrl: string): string {
 }
 
 export function resolveApiAsset(pathOrUrl: string): string {
+  if (!pathOrUrl) return pathOrUrl;
+
+  // уже полный URL — не трогаем
+  if (pathOrUrl.startsWith("http")) {
+    return pathOrUrl;
+  }
+
+  const token = getToken();
+
+  // если это файл (uploads/static) → проксируем через protected-image
+  if (
+    pathOrUrl.includes("/uploads") ||
+    pathOrUrl.includes("/static")
+  ) {
+    const cleanPath = pathOrUrl
+      .replace(/^\/static\/uploads\//, "")
+      .replace(/^\/uploads\//, "")
+      .replace(/^\/static\//, "");
+
+    return `${API_BASE}/protected-image/${cleanPath}?token=${token}`;
+  }
+
   return toUrl(pathOrUrl);
 }
 
@@ -22,6 +44,10 @@ export function resolveWebSocketUrl(path: string): string {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
   const wsBase = API_BASE.replace(/^http/, "ws");
   return `${wsBase}${normalizedPath}`;
+}
+export function resolveProtectedImage(path: string): string {
+  const token = getToken();
+  return `${API_BASE}/protected-image/${path}?token=${token}`;
 }
 
 export async function apiFetch<T>(pathOrUrl: string, options: ApiFetchOptions = {}): Promise<T> {
