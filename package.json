@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "react-markdown": "^8.0.7",
+    "rehype-raw": "^7.0.0",
+    "remark-gfm": "^4.0.1"
+  }
+}

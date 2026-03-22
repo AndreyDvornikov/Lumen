@@ -350,3 +350,15 @@ color: #777;
   100% { opacity: 0.88; }
 
 }
+
+.spoiler {
+  background: #444;
+  color: transparent;
+  cursor: pointer;
+  padding: 0 4px;
+  border-radius: 4px;
+}
+
+.spoiler:hover {
+  color: white;
+}
